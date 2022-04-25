@@ -139,16 +139,31 @@ As for variant `Detector3DTemplate` existing, let's look into **PVRCNN** model.
 - load_params_with_optimizer()
 
 **build_network()** in the Detector3DTemplate class.
-All the variables defined in the `build_network()` comes from kitti_dataset.yaml file.
-It define the network charateristics for datasets.
+All the variables defined in the `build_network()` comes from kitti_dataset.yaml file and each model yaml file(ex. pv_rcnn.yaml).
+From the kitti_dataset.yaml file, It define the network charateristics for datasets.
 
-`module_list` : 
+`module_list` : It builds the network model. 
+There are module_topology dictionary for convenience.
 ```
 self.module_topology = [
     'vfe', 'backbone_3d', 'map_to_bev_module', 'pfe',
     'backbone_2d', 'dense_head',  'point_head', 'roi_head'
 ]
-...
+```
+If you see the whole lines in the `detector3d_template.py`, you can find a method starting with build_xx.
+For example,
+```
+- build_vfe()
+- build_backbone_3d()
+- build_map_to_bev_module()
+- build_backbone_2d()
+- build_pfe()
+- build_dense_head()
+- build_point_head()
+- build_roi_head()
+```
+These methods generate module of model following configure file (`pv_rcnn.yaml`).
+```
 for module_name in self.module_topology:
     module, model_info_dict = getattr(self, 'build_%s' % module_name)(
         model_info_dict=model_info_dict
@@ -194,8 +209,31 @@ DATA_PROCESSOR:
  ```
  POINT_CLOUD_RANGE: [0, -40, -3, 70.4, 40, 1]
  ```
- 
- 
+For your understanding, let's summarize model structure defined in the `pv_rcnn.yaml`.
+```
+MODEL:
+    NAME: PVRCNN
+    VFE:
+        NAME: MeanVFE
+    BACKBONE_3D:
+        NAME: VoxelBackBone8x
+    MAP_TO_BEV:
+        NAME: HeightCompression
+        NUM_BEV_FEATURES: 256
+    BACKBONE_2D:
+		...
+    DENSE_HEAD:
+		...
+    PFE:
+		...
+    POINT_HEAD:
+		...
+    ROI_HEAD:
+		...
+    POST_PROCESSING:
+	    	...
+```
+
 ---
 
 
