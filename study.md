@@ -138,6 +138,64 @@ As for variant `Detector3DTemplate` existing, let's look into **PVRCNN** model.
 - load_params_from_file()
 - load_params_with_optimizer()
 
+**build_network()** in the Detector3DTemplate class.
+All the variables defined in the `build_network()` comes from kitti_dataset.yaml file.
+It define the network charateristics for datasets.
+
+`module_list` : 
+```
+self.module_topology = [
+    'vfe', 'backbone_3d', 'map_to_bev_module', 'pfe',
+    'backbone_2d', 'dense_head',  'point_head', 'roi_head'
+]
+...
+for module_name in self.module_topology:
+    module, model_info_dict = getattr(self, 'build_%s' % module_name)(
+        model_info_dict=model_info_dict
+    )
+    self.add_module(module_name, module)
+```
+`num_rawpoint_features` : from .processor.point_feature_encoder import PointFeatureEncoder
+`num_point_feature` : from .processor.point_feature_encoder import PointFeatureEncoder
+```
+ POINT_FEATURE_ENCODING: {
+    encoding_type: absolute_coordinates_encoding,
+    used_feature_list: ['x', 'y', 'z', 'intensity'],
+    src_feature_list: ['x', 'y', 'z', 'intensity'],
+}
+```
+
+
+ `grid_size` : 
+`voxel_size`
+ `depth_downsample_factor`.
+```
+DATA_PROCESSOR:
+    - NAME: mask_points_and_boxes_outside_range
+      REMOVE_OUTSIDE_BOXES: True
+
+    - NAME: shuffle_points
+      SHUFFLE_ENABLED: {
+        'train': True,
+        'test': False
+      }
+
+    - NAME: transform_points_to_voxels
+      VOXEL_SIZE: [0.05, 0.05, 0.1]
+      MAX_POINTS_PER_VOXEL: 5
+      MAX_NUMBER_OF_VOXELS: {
+        'train': 16000,
+        'test': 40000
+      }
+
+``` 
+
+ `point_cloud_range` :
+ ```
+ POINT_CLOUD_RANGE: [0, -40, -3, 70.4, 40, 1]
+ ```
+ 
+ 
 ---
 
 
