@@ -184,6 +184,7 @@ for module_name in self.module_topology:
  `grid_size` : 
 `voxel_size`
  `depth_downsample_factor`.
+ 
 ```
 DATA_PROCESSOR:
     - NAME: mask_points_and_boxes_outside_range
@@ -194,7 +195,6 @@ DATA_PROCESSOR:
         'train': True,
         'test': False
       }
-
     - NAME: transform_points_to_voxels
       VOXEL_SIZE: [0.05, 0.05, 0.1]
       MAX_POINTS_PER_VOXEL: 5
@@ -209,30 +209,68 @@ DATA_PROCESSOR:
  ```
  POINT_CLOUD_RANGE: [0, -40, -3, 70.4, 40, 1]
  ```
-For your understanding, let's summarize model structure defined in the `pv_rcnn.yaml`.
+ 
+For your understanding, let's summarize model structure defined in the `pcdet/model`.
+
 ```
 MODEL:
-    NAME: PVRCNN
     VFE:
-        NAME: MeanVFE
+		-VFETemplate
+		-MeanVFE
+		-PillarVFE
+		-ImageVFE
+		-DynMeanVFE
+		-DynPillarVFE    
+
     BACKBONE_3D:
-        NAME: VoxelBackBone8x
+    	-VoxelBackBone8x
+		-UNetV2
+		-PointNet2Backbone
+		-PointNet2MSG
+		-VoxelResBackBone8x
+
     MAP_TO_BEV:
-        NAME: HeightCompression
-        NUM_BEV_FEATURES: 256
+    	-HeightCompression
+		-PointPillarScatter
+		-Conv2DCollapse
+
     BACKBONE_2D:
-		...
+		-BaseBEVBackbone
+    
     DENSE_HEAD:
-		...
+		-AnchorHeadTemplate
+		-AnchorHeadSingle
+		-PointIntraPartOffsetHead
+		-PointHeadSimple
+		-PointHeadBox
+		-AnchorHeadMulti
+		-CenterHead
+    
     PFE:
-		...
+		-VoxelSetAbstraction
+		
     POINT_HEAD:
-		...
+		-AnchorHeadTemplate
+		-AnchorHeadSingle
+		-PointIntraPartOffsetHead
+		-PointHeadSimple
+		-PointHeadBox
+		-AnchorHeadMulti
+		-CenterHead
+    
     ROI_HEAD:
-		...
+		-RoIHeadTemplate
+		-PartA2FCHead
+		-PVRCNNHead
+		-SECONDHead
+		-PointRCNNHead
+		-VoxelRCNNHead
+		
     POST_PROCESSING:
 	    	...
 ```
+All the model can be found at the `pcdet/models` directory.
+Pre-defined model topologies can be adopted easily.
 
 ---
 
