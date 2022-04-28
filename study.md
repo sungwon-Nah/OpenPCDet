@@ -139,6 +139,8 @@ As for variant `Detector3DTemplate` existing, let's look into **PVRCNN** model.
 - load_params_with_optimizer()
 
 **build_network()** in the Detector3DTemplate class.
+$$ build network() \supset build detector() \supset Detector3DTemplate()$$
+
 All the variables defined in the `build_network()` comes from kitti_dataset.yaml file and each model yaml file(ex. pv_rcnn.yaml).
 From the kitti_dataset.yaml file, It define the network charateristics for datasets.
 
@@ -272,7 +274,107 @@ MODEL:
 All the model can be found at the `pcdet/models` directory.
 Pre-defined model topologies can be adopted easily.
 
+**NOTE**
+Generally, `BACKBONE` is used as a feature extractor, which gives you a feature map representation of the input.
+`HEAD` is used as a performing the actual task, such as detection, segmentation, etc. 
+This way is similar to a head attached to the backbone.
+
+Let's see more detail for each module and its parameters.
+
+```
+VFE : Voxel Feature Extraction 
+	- num_rawpoint_features
+	- point_cloud_range
+	- voxel_size
+	- grid_size
+	- depth_downsample_factor
+
+BACKBONE_3D 
+	- num_point_features
+	- grid_size
+	- voxel_size
+	- point_cloud_range
+	- backbone_channels
+	
+MAP_TO_BEV
+	- grid_size
+	- num_bev_features
+
+BACKBONE_2D
+	- num_bev_features --> output of MAP_TO_BEV
+	
+PFE : Point Feature Extraction
+	- 
+	...
+
+```
 ---
+
+* **build_optimizer()** is defined at the `tools/train_utils/optimization/__init__.py`
+We can set the configuration of the optimization at the end of the *model.yaml* file. 
+```
+optim_cfg.OPTIMIZER == 'adam' or 'sgd' or 'adam_onecycle'
+```
+We can set the batch size per gpu and number of epochs ... etc.
+
+```
+OPTIMIZATION:
+    BATCH_SIZE_PER_GPU: 2
+    NUM_EPOCHS: 80
+
+    OPTIMIZER: adam_onecycle
+    LR: 0.01
+    WEIGHT_DECAY: 0.01
+    MOMENTUM: 0.9
+
+    MOMS: [0.95, 0.85]
+    PCT_START: 0.4
+    DIV_FACTOR: 10
+    DECAY_STEP_LIST: [35, 45]
+    LR_DECAY: 0.1
+    LR_CLIP: 0.0000001
+
+    LR_WARMUP: False
+    WARMUP_EPOCH: 1
+
+    GRAD_NORM_CLIP: 10
+```
+
+---
+
+* **build_scheduler()** is defined at the `tools/train_utils/optimization/__init__.py` as like **build_optimizer()**.
+The output of `scheduler()` is *lr_scheduler*, *lr_warmup_scheduler*. 
+As a result, the output is determined by `build_optimzier()`. 
+Except for `adam_onecycle` optimizer, `adam` and `sgd` is scheduled by `LambdaLR`.
+`adam_onecycle` uses `OneCycle` to determine a *lr_scheduler*.
+```
+    lr_warmup_scheduler = None
+    total_steps = total_iters_each_epoch * total_epochs
+    if optim_cfg.OPTIMIZER == 'adam_onecycle':
+        lr_scheduler = OneCycle(
+            optimizer, total_steps, optim_cfg.LR, list(optim_cfg.MOMS), optim_cfg.DIV_FACTOR, optim_cfg.PCT_START
+        )
+    else:
+        lr_scheduler = lr_sched.LambdaLR(optimizer, lr_lbmd, last_epoch=last_epoch)
+
+        if optim_cfg.LR_WARMUP:
+            lr_warmup_scheduler = CosineWarmupLR(
+                optimizer, T_max=optim_cfg.WARMUP_EPOCH * len(total_iters_each_epoch),
+                eta_min=optim_cfg.LR / optim_cfg.DIV_FACTOR
+            )
+
+```
+
+---
+
+We have learned about **train.py** code.
+To summarize this study note, your contribution can be different depending on your applications.
+
+1. If you want to train on your custom dataset, you should study dataset configurations, and parameters for build_networks.
+Also, build_dataloader().
+
+2. If you want to make a new model for the detecting 3D objects, please study about build_network and lots of modules defined in the model yaml file.
+
 
 
 
