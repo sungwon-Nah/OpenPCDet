@@ -39,6 +39,7 @@ class DemoDataset(DatasetTemplate):
         )
         self.root_path = root_path
         self.ext = ext
+        print(root_path)
         data_file_list = glob.glob(str(root_path / f'*{self.ext}')) if self.root_path.is_dir() else [self.root_path]
 
         data_file_list.sort()

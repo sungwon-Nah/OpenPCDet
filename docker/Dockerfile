@@ -55,17 +55,20 @@ RUN wget https://jaist.dl.sourceforge.net/project/boost/boost/1.68.0/boost_1_68_
     rm -rf ./boost_1_68_0.tar.gz 
 
 # A weired problem that hasn't been solved yet
-RUN pip uninstall -y SharedArray && \
-    pip install SharedArray
+RUN pip3 uninstall -y SharedArray && \
+    pip3 install SharedArray
 
-RUN pip install spconv-cu113
+RUN pip3 install spconv-cu113
 
-RUN pip install open3d==0.13
+RUN pip3 install open3d==0.13
+RUN pip3 install tensorflow-cpu==2.1.0
+RUN pip3 install tensorflow-gpu==2.1.0
+RUN pip3 install waymo-open-dataset-tf-2-0-0==1.2.0
 RUN apt install -y libgl1-mesa-glx
 
 #just for running the Demo we need to add:
 RUN apt-get update && apt-get install -y python3-opencv
-RUN pip install opencv-python
+RUN pip3 install opencv-python
 
 #to get a GUI one needs to install:
 RUN apt-get install -y python3-tk 

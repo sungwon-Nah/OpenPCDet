@@ -1,4 +1,16 @@
 ## Study note
+
+### USRG getting start
+ - build image
+run  `./generate_image.sh`
+
+ - Getting start
+run  `./run_openpcd.sh`
+**When you start container first time**,  **run** `python3 setup.py develop`
+
+- Terminate docker container
+run  `./terminate_docker.sh`
+
 ### train.py
 - parse_config():
 
