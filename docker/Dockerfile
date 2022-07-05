@@ -63,7 +63,7 @@ RUN pip3 install spconv-cu113
 RUN pip3 install open3d==0.13
 RUN pip3 install tensorflow-cpu==2.1.0
 RUN pip3 install tensorflow-gpu==2.1.0
-RUN pip3 install waymo-open-dataset-tf-2-0-0==1.2.0
+RUN pip3 install waymo-open-dataset-tf-2-1-0==1.2.0
 RUN apt install -y libgl1-mesa-glx
 
 #just for running the Demo we need to add:
